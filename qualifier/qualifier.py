@@ -1,8 +1,8 @@
 from functools import reduce
 from typing import Any, Iterable
 
+import cv2
 import numpy as np
-from PIL import Image
 
 
 def prod(seq: Iterable[Any]) -> Any:
@@ -48,37 +48,32 @@ def rearrange_tiles(
     - https://realpython.com/image-processing-with-the-python-pillow-library
     """
 
-    img: Image.Image
-    with Image.open(image_path) as img:
-        if not valid_input(img.size, tile_size, ordering):
-            raise ValueError(
-                "The tile size or ordering are not valid for the given image"
-            )
+    img = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    if not valid_input(img.shape[:2], tile_size, ordering):
+        raise ValueError("The tile size or ordering are not valid for the given image")
 
-        img_arr = np.asarray(img)
-        img_height, img_width, channels = img_arr.shape
-        tile_height, tile_width = tile_size
+    img_height, img_width, channels = img.shape
+    tile_height, tile_width = tile_size
 
-        rows = img_height // tile_height
-        cols = img_width // tile_width
-        tiles = img_arr.reshape(
-            rows,
-            tile_height,
-            cols,
-            tile_width,
-            channels,
-        ).swapaxes(1, 2)
+    rows = img_height // tile_height
+    cols = img_width // tile_width
+    tiles = img.reshape(
+        rows,
+        tile_height,
+        cols,
+        tile_width,
+        channels,
+    ).swapaxes(1, 2)
 
-        arranged_img_arr = np.zeros(tiles.shape, dtype=np.uint8)
+    arranged_img = np.zeros(tiles.shape, dtype=np.uint8)
 
-        for i, order in enumerate(ordering):
-            row, col = divmod(i, cols)
-            correct_row, correct_col = divmod(order, cols)
-            arranged_img_arr[row, col] = tiles[correct_row, correct_col]
+    for i, order in enumerate(ordering):
+        row, col = divmod(i, cols)
+        correct_row, correct_col = divmod(order, cols)
+        arranged_img[row, col] = tiles[correct_row, correct_col]
 
-        arranged_img_arr = arranged_img_arr.swapaxes(1, 2).reshape(img_arr.shape)
-        arranged_img = Image.fromarray(arranged_img_arr)
-        arranged_img.save(out_path)
+    arranged_img = arranged_img.swapaxes(1, 2).reshape(img.shape)
+    cv2.imwrite(out_path, arranged_img)
 
 
 if __name__ == "__main__":
