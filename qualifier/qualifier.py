@@ -23,8 +23,8 @@ def valid_input(
 
     return (
         remainder == 0
-        and tiles == len(ordering)
-        and len(set(ordering)) == len(ordering)
+        and len(o := set(ordering)) == len(ordering)
+        and o == set(range(tiles))
     ) or False
 
 
@@ -73,3 +73,9 @@ def rearrange_tiles(
         arranged_img_arr = arranged_img_arr.swapaxes(1, 2).reshape(img_arr.shape)
         arranged_img = Image.fromarray(arranged_img_arr)
         arranged_img.save(out_path)
+
+
+if __name__ == "__main__":
+    test_cases = ((((4, 4), (2, 2), [0, 1, 2, 4]), False),)
+    for args, expected in test_cases:
+        assert valid_input(*args) == expected
