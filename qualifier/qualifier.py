@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 
-def prod(seq: Iterable[Any]) -> Any:  # meh, bounding feels like a mess
+def prod(seq: Iterable[Any]) -> Any:
     return reduce(lambda acc, i: acc * i, seq)
 
 
@@ -40,6 +40,12 @@ def rearrange_tiles(
     The tile size must divide each image dimension without remainders, and `ordering` must use each input tile exactly
     once. If these conditions do not hold, raise a ValueError with the message:
     "The tile size or ordering are not valid for the given image".
+
+    References:
+    - https://towardsdatascience.com/efficiently-splitting-an-image-into-tiles-in-python-using-numpy-d1bf0dd7b6f7
+
+    Relevent:
+    - https://realpython.com/image-processing-with-the-python-pillow-library
     """
 
     img: Image.Image
