@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "code-jam-10-qualifier"
+version = "0.1.0"
+description = ""
+authors = ["nozwock <57829219+nozwock@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{ include = "code_jam_10_qualifier" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+opencv-python = "^4.8.0.76"
+numpy = "^1.25.2"
+pillow = "^10.0.0"
+
+[tool.ruff]
+line-length = 120
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
