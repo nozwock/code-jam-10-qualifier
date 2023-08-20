@@ -1,6 +1,7 @@
 from math import prod
 
 import cv2
+import numpy as np
 
 
 def valid_input(
@@ -15,11 +16,7 @@ def valid_input(
 
     tiles, remainder = divmod(prod(image_size), prod(tile_size))
 
-    return (
-        remainder == 0
-        and len(o := set(ordering)) == len(ordering)
-        and o == set(range(tiles))
-    ) or False
+    return (remainder == 0 and sorted(ordering) == list(range(tiles))) or False
 
 
 def rearrange_tiles(
@@ -51,7 +48,9 @@ def rearrange_tiles(
 
     rows = img_height // tile_height
     cols = img_width // tile_width
-    tiles = img.reshape(
+
+    # Having these seperated for self documentation purposes
+    unordered_tiles = img.reshape(
         rows,
         tile_height,
         cols,
@@ -59,23 +58,29 @@ def rearrange_tiles(
         channels,
     ).swapaxes(1, 2)
 
-    arranged_img = (
-        tiles.reshape(rows * cols, tile_height, tile_width, channels)[ordering]
-        .reshape(
-            rows,
-            cols,
-            tile_height,
-            tile_width,
-            channels,
-        )
-        .swapaxes(1, 2)
-        .reshape(img.shape)
+    # `unordered_tiles[n, m]` here returns a view of shape (tiles, tile_height, tile_width, channels)
+    ordered_tiles = unordered_tiles[*np.divmod(ordering, cols)].reshape(
+        rows,
+        cols,
+        tile_height,
+        tile_width,
+        channels,
     )
 
-    cv2.imwrite(out_path, arranged_img)
+    unscrambled_img = ordered_tiles.swapaxes(1, 2).reshape(img.shape)
+
+    cv2.imwrite(out_path, unscrambled_img)
 
 
 if __name__ == "__main__":
-    test_cases = ((((4, 4), (2, 2), [0, 1, 2, 4]), False),)
+    # `valid_input` tests
+    test_cases = (
+        (((4, 4), (2, 2), [0, 1, 2, 4]), False),
+        (((4, 4), (2, 2), [0, 1, 2]), False),
+        (((4, 4), (2, 2), [0, 1, 2, 3, 3]), False),
+        (((4, 4), (2, 2), [0, 1, 2, 3, 3, 4]), False),
+        (((4, 4), (2, 2), [0, 1, 2, 3]), True),
+        (((4, 4), (3, 3), [0, 1, 2, 3]), False),
+    )
     for args, expected in test_cases:
-        assert valid_input(*args) == expected
+        assert valid_input(*args) == expected, f"{args, expected=}"
