@@ -1,12 +1,6 @@
-from functools import reduce
-from typing import Any, Iterable
+from math import prod
 
 import cv2
-import numpy as np
-
-
-def prod(seq: Iterable[Any]) -> Any:
-    return reduce(lambda acc, i: acc * i, seq)
 
 
 def valid_input(
@@ -65,14 +59,19 @@ def rearrange_tiles(
         channels,
     ).swapaxes(1, 2)
 
-    arranged_img = np.zeros(tiles.shape, dtype=np.uint8)
+    arranged_img = (
+        tiles.reshape(rows * cols, tile_height, tile_width, channels)[ordering]
+        .reshape(
+            rows,
+            cols,
+            tile_height,
+            tile_width,
+            channels,
+        )
+        .swapaxes(1, 2)
+        .reshape(img.shape)
+    )
 
-    for i, order in enumerate(ordering):
-        row, col = divmod(i, cols)
-        correct_row, correct_col = divmod(order, cols)
-        arranged_img[row, col] = tiles[correct_row, correct_col]
-
-    arranged_img = arranged_img.swapaxes(1, 2).reshape(img.shape)
     cv2.imwrite(out_path, arranged_img)
 
 
